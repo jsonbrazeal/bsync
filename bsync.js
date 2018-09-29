@@ -18,44 +18,80 @@ function dataURItoBlob (dataURI) {
     return new Blob([ab],{type: mimeString});
 }
 
+function uploadToS3(data) {
+  var base64Text = btoa(data.toString());
+  var dataUrl = 'data:text/plain;base64,' + base64Text
+  var blobData = dataURItoBlob(dataUrl);
+  chrome.storage.local.get({
+    computer: '',
+    target_root: '',
+    target_folder: '',
+    s3_bucket: '',
+    s3_region: '',
+    s3_key_id: '',
+    s3_key_secret: '',
+    sync_file: '',
+  }, function(items) {
+    if (!(items.computer && items.target_root && items.target_folder && items.s3_bucket && items.sync_file, items.s3_region && items.s3_key_secret && items.s3_key_id)) {
+      alert('bsync is not correctly configured for uploadToS3 operation');
+      chrome.runtime.openOptionsPage();
+      return;
+    }
+    AWS.config.update({accessKeyId: items.s3_key_id, secretAccessKey: items.s3_key_secret});
+    AWS.config.region = items.s3_region;
+    console.log('hi')
+    console.log(items)
+    console.log(AWS.config)
+    var s3 = new AWS.S3({
+      apiVersion: '2006-03-01',
+      params: {Bucket: items.s3_bucket}
+    });
+    var params = {Key: items.sync_file, ContentType: 'plain/text', Body: blobData}
+    s3.putObject(params, function (err, data) {
+      console.log(err ? 'error: ' + err.toString() : 'uploaded!');
+      console.log(data);
+    });
+  });
+}
+
+function downloadFromS3() {
+  chrome.storage.local.get({
+    computer: '',
+    target_root: '',
+    target_folder: '',
+    s3_bucket: '',
+    s3_region: '',
+    s3_key_id: '',
+    s3_key_secret: '',
+    sync_file: '',
+  }, function(items) {
+    if (!(items.computer && items.target_root && items.target_folder && items.s3_bucket && items.sync_file && items.s3_region && items.s3_key_secret && items.s3_key_id)) {
+      alert('bsync is not correctly configured for downloadFromS3 operation');
+      chrome.runtime.openOptionsPage();
+    }
+    AWS.config.update({accessKeyId: items.s3_key_id, secretAccessKey: items.s3_key_secret});
+    AWS.config.region = items.s3_region;
+    var s3 = new AWS.S3({
+      apiVersion: '2006-03-01',
+      params: {Bucket: items.s3_bucket}
+    });
+    var params = {
+      Bucket: items.s3_bucket,
+      Key: items.sync_file
+    };
+    s3.getObject(params, function(err, data) {
+      console.log(err ? 'error: ' + err.toString() : 'downloaded!');
+      console.log(data);
+      console.log(data.Body.toString());
+      console.log(JSON.parse(data.Body.toString()))
+    });
+  });
+}
 
 chrome.runtime.onInstalled.addListener(function(details) {
 
   console.log(details);
-  AWS.config.update({accessKeyId: '', secretAccessKey: ''});
-  AWS.config.region = 'us-west-2';
-  // AWS.config.s3_host_name = 'bsync-data.s3-us-west-2.amazonaws.com';
-  // var canvas  = document.getElementById("imagePreviewChatFooter");
-  // var dataUrl = canvas.toDataURL("image/jpeg");
-  // var dataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
-  var base64Text = btoa('Hello World');
-  var dataUrl = "data:text/plain;base64," + base64Text
-  var blobData = dataURItoBlob(dataUrl);
-  var bucketName = 'bsync-data';
-  // var fileName = 'canvas.png';
-  var fileName = 'hi.txt';
-  // var fileType = 'image/png';
-  var fileType = 'plain/text';
-  var params = {Bucket: bucketName}
-  var s3 = new AWS.S3({
-    apiVersion: '2006-03-01',
-    params: params
-  });
-  // var params = {Key: fileName, ContentType: fileType, Body: blobData}
-  // s3.putObject(params, function (err, data) {
-  //   console.log(err ? 'ERROR: ' + err.toString() : 'UPLOADED.');
-  //   console.log(data);
-  // });
-
-  var params = {
-    Bucket: bucketName,
-    Key: fileName
-  };
-  s3.getObject(params, function(err, data) {
-    console.log(err ? 'ERROR: ' + err.toString() : 'DOWNLOADED.');
-    console.log(data);
-    console.log(data.Body.toString());
-  });
+  chrome.runtime.openOptionsPage();
 
 });
 
@@ -63,51 +99,70 @@ chrome.runtime.onInstalled.addListener(function(details) {
 // bookmarks. The tree is always reloaded in case the events happened while the
 // page was inactive.
 
-// chrome.bookmarks.onMoved.addListener(function(id, info) {
-//   tree.load(function() {
-//     var managedNode = tree.getById(id);
-//     if (managedNode && !managedNode.isRoot()) {
-//       managedNode.moveInModel(info.parentId, info.index, function(){});
-//     } else {
-//       // Check if the parent node has managed children that need to move.
-//       // Example: moving a non-managed bookmark in front of the managed
-//       // bookmarks.
-//       var parentNode = tree.getById(info.parentId);
-//       if (parentNode)
-//         parentNode.reorderChildren();
-//     }
-//   });
-// });
+chrome.bookmarks.onCreated.addListener(function(id, info) {
+  console.log('bookmark created:');
+  console.log(info);
+  console.log('uploading to s3');
+  // uploadToS3('{ "bookmark": "created" }');
+  downloadFromS3();
+});
 
-// chrome.bookmarks.onChanged.addListener(function(id, info) {
-//   tree.load(function() {
-//     var managedNode = tree.getById(id);
-//     if (!managedNode || managedNode.isRoot())
-//       return;
-//     chrome.bookmarks.update(id, {
-//       'title': managedNode._title,
-//       'url': managedNode._url
-//     });
-//   });
-// });
+chrome.bookmarks.onChildrenReordered.addListener(function(id, info) {
+  console.log('bookmark children reordered');
+  console.log(info);
+});
 
-// chrome.bookmarks.onRemoved.addListener(function(id, info) {
-//   tree.load(function() {
-//     var managedNode = tree.getById(id);
-//     if (!managedNode || managedNode.isRoot())
-//       return;
-//     // A new tree.store() is needed at the end because the regenerated nodes
-//     // will have new IDs.
-//     var callbackChain = new CallbackChain();
-//     callbackChain.push(tree.store.bind(tree));
-//     managedNode.regenerate(info.parentId, info.index, callbackChain);
-//   });
-// });
+chrome.bookmarks.onImportEnded.addListener(function(id, info) {
+  console.log('bookmark import ended');
+  console.log(info);
+});
 
+chrome.bookmarks.onMoved.addListener(function(id, info) {
+  // tree.load(function() {
+  //   var managedNode = tree.getById(id);
+  //   if (managedNode && !managedNode.isRoot()) {
+  //     managedNode.moveInModel(info.parentId, info.index, function(){});
+  //   } else {
+  //     // Check if the parent node has managed children that need to move.
+  //     // Example: moving a non-managed bookmark in front of the managed
+  //     // bookmarks.
+  //     var parentNode = tree.getById(info.parentId);
+  //     if (parentNode)
+  //       parentNode.reorderChildren();
+  //   }
+  // });
+  console.log('bookmark moved');
+  console.log(info);
+});
 
+chrome.bookmarks.onChanged.addListener(function(id, info) {
+  // tree.load(function() {
+  //   var managedNode = tree.getById(id);
+  //   if (!managedNode || managedNode.isRoot())
+  //     return;
+  //   chrome.bookmarks.update(id, {
+  //     'title': managedNode._title,
+  //     'url': managedNode._url
+  //   });
+  // });
+  console.log('bookmark changed');
+  console.log(info);
+});
 
-
-
+chrome.bookmarks.onRemoved.addListener(function(id, info) {
+  // tree.load(function() {
+  //   var managedNode = tree.getById(id);
+  //   if (!managedNode || managedNode.isRoot())
+  //     return;
+  //   // A new tree.store() is needed at the end because the regenerated nodes
+  //   // will have new IDs.
+  //   var callbackChain = new CallbackChain();
+  //   callbackChain.push(tree.store.bind(tree));
+  //   managedNode.regenerate(info.parentId, info.index, callbackChain);
+  // });
+  console.log('bookmark removed');
+  console.log(info);
+});
 
 // // Important note: if you make an extension with an Event page ("persistent": false in the manifest), setInterval with 5-minute interval will fail as the background page will get unloaded.
 
@@ -115,15 +170,15 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 // // In this case, you need to implement it using chrome.alarms API:
 
-// chrome.alarms.create("5min", {
-//   delayInMinutes: 5,
-//   periodInMinutes: 5
-// });
+chrome.alarms.create('5min', {
+  delayInMinutes: 5,
+  periodInMinutes: 5
+});
 
-// chrome.alarms.onAlarm.addListener(function(alarm) {
-//   if (alarm.name === "5min") {
-//     doStuff();
-//   }
-// });
+chrome.alarms.onAlarm.addListener(function(alarm) {
+  if (alarm.name === '5min') {
+    console.log('5min alarm!!! ' + new Date().toUTCString())
+  }
+});
 
 // // In case of persistent background pages, setInterval is still an acceptable solution.

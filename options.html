@@ -1,21 +1,38 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      button {
-        height: 30px;
-        width: 30px;
-        outline: none;
-        margin: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="buttonDiv">
-    </div>
-    <div>
-      <p>Choose a different background color!</p>
-    </div>
-  </body>
-  <script src="options.js"></script>
+<head><title>bsync</title></head>
+<body>
+
+<div>
+  <label>Computer:</label>
+  <select id="computer">
+    <option value="home">home</option>
+    <option value="remote">remote</option>
+  </select>
+  <p>If "remote" is selected, all bookmarks from this computer will be synced to AWS S3.</p>
+  <p>If "home" is selected, all bookmarks will be synced from AWS S3 to this computer. In that case, you will be prompted to choose a target folder where the remote bookmarks will be saved to. Note: everything in this folder is cleared out and replaced with remote bookmarks when a sync operation occurs.</p>
+</div>
+
+<div id="target">
+  <label>Target Folder:</label>
+  <select id="target_root">
+    <option value="bar">bookmarks bar</option>
+    <option value="other">other bookmarks</option>
+  </select>/<input type="text" id="target_folder" placeholder="path/to/folder">
+</div>
+
+<div>
+  <label>AWS S3:</label>
+  <input type="text" id="s3_key_id" placeholder="access key id">
+  <input type="text" id="s3_key_secret" placeholder="access key secret">
+  <input type="text" id="s3_bucket" placeholder="bucket name">
+  <input type="text" id="s3_region" placeholder="region">
+</div>
+
+<button id="save">Save</button>
+
+<div id="status"></div>
+
+<script src="options.js"></script>
+</body>
 </html>

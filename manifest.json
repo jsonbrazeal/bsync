@@ -9,9 +9,14 @@
     "persistent": false
   },
   "permissions": [
-    "bookmarks"
+    "bookmarks",
+    "storage",
+    "alarms"
   ],
-  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
   "icons": {
     "16": "invaders.png",
     "32": "invaders.png",
