@@ -1,0 +1,21 @@
+{
+  "name": "bsync",
+  "description": "Bookmarks Sync",
+  "version": "1.0",
+  "manifest_version": 2,
+  "minimum_chrome_version": "69",
+  "background": {
+    "scripts": ["aws-sdk.js", "bsync.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "bookmarks"
+  ],
+  "options_page": "options.html",
+  "icons": {
+    "16": "invaders.png",
+    "32": "invaders.png",
+    "48": "invaders.png",
+    "128": "invaders.png"
+  }
+}
