@@ -23,27 +23,27 @@ function uploadToS3(data) {
   var dataUrl = 'data:text/plain;base64,' + base64Text
   var blobData = dataURItoBlob(dataUrl);
   chrome.storage.local.get({
-    s3_bucket: '',
-    s3_region: '',
-    s3_key_id: '',
-    s3_key_secret: '',
-    sync_file: '',
+    s3Bucket: '',
+    s3Region: '',
+    s3KeyId: '',
+    s3KeySecret: '',
+    syncFile: '',
   }, function(items) {
-    if (!(items.s3_bucket && items.sync_file, items.s3_region && items.s3_key_secret && items.s3_key_id)) {
+    if (!(items.s3Bucket && items.syncFile, items.s3Region && items.s3KeySecret && items.s3KeyId)) {
       alert('bsync is not correctly configured for uploadToS3 operation');
       chrome.runtime.openOptionsPage();
       return;
     }
-    AWS.config.update({accessKeyId: items.s3_key_id, secretAccessKey: items.s3_key_secret});
-    AWS.config.region = items.s3_region;
+    AWS.config.update({accessKeyId: items.s3KeyId, secretAccessKey: items.s3KeySecret});
+    AWS.config.region = items.s3Region;
     var s3 = new AWS.S3({
       apiVersion: '2006-03-01',
-      params: {Bucket: items.s3_bucket}
+      params: {Bucket: items.s3Bucket}
     });
-    var params = {Key: items.sync_file, ContentType: 'plain/text', Body: blobData}
+    var params = {Key: items.syncFile, ContentType: 'plain/text', Body: blobData}
     s3.putObject(params, function (err, data) {
       if (err) {
-        console.log('error: ' + err.toString());
+        console.log('⚠️ error: ' + err.toString());
         alert('bsync uploadToS3 error: ' + err.toString());
       } else {
         console.log('sync done 😎');
@@ -54,45 +54,44 @@ function uploadToS3(data) {
 
 function downloadFromS3() {
   chrome.storage.local.get({
-    s3_bucket: '',
-    s3_region: '',
-    s3_key_id: '',
-    s3_key_secret: '',
-    sync_file: '',
-    target_root: '',
-    target_folder: ''
+    s3Bucket: '',
+    s3Region: '',
+    s3KeyId: '',
+    s3KeySecret: '',
+    syncFile: '',
+    targetRoot: '',
+    targetFolder: ''
   }, function(items) {
-    if (!(items.s3_bucket && items.sync_file && items.s3_region && items.s3_key_secret && items.s3_key_id && items.target_root && items.target_folder)) {
+    if (!(items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && items.targetRoot && items.targetFolder)) {
       alert('bsync is not correctly configured for downloadFromS3 operation');
       chrome.runtime.openOptionsPage();
     }
-    AWS.config.update({accessKeyId: items.s3_key_id, secretAccessKey: items.s3_key_secret});
-    AWS.config.region = items.s3_region;
+    AWS.config.update({accessKeyId: items.s3KeyId, secretAccessKey: items.s3KeySecret});
+    AWS.config.region = items.s3Region;
     var s3 = new AWS.S3({
       apiVersion: '2006-03-01',
-      params: {Bucket: items.s3_bucket}
+      params: {Bucket: items.s3Bucket}
     });
     var params = {
-      Bucket: items.s3_bucket,
-      Key: items.sync_file
+      Bucket: items.s3Bucket,
+      Key: items.syncFile
     };
     s3.getObject(params, function(err, data) {
       if (err) {
-        console.log('error: ' + err.toString());
+        console.log('⚠️ error: ' + err.toString());
         alert('bsync downloadFromS3 error: ' + err.toString());
       } else {
-        console.log('got bookmarks 🤓');
-        console.log(data.Body.toString());
+        console.log('🤓 downloaded bookmarks');
         // bookmarks = JSON.parse(decodeURIComponent(escape(window.atob(data.Body.toString()))))
         bookmarks = JSON.parse(data.Body.toString())
-        replaceInHomeTree(bookmarks, items.target_root, items.target_folder);
+        replaceInHomeTree(bookmarks, items.targetRoot, items.targetFolder);
       }
     });
   });
 }
 
 chrome.runtime.onInstalled.addListener(function(details) {
-  console.log('bsync: ' + JSON.stringify(details));
+  console.log('☀️ bsync loaded: ' + JSON.stringify(details));
   chrome.runtime.openOptionsPage();
 });
 
@@ -110,7 +109,6 @@ function performSync() {
     if (items.computer == 'remote') {
       var bookmarkTreeNodes = chrome.bookmarks.getTree(
         function(bookmarkTreeNodes) {
-          console.log(bookmarkTreeNodes);
           var bookmarkTreeNodesString= unescape(encodeURIComponent(JSON.stringify(bookmarkTreeNodes)));
           uploadToS3(bookmarkTreeNodesString);
         }
@@ -118,20 +116,65 @@ function performSync() {
     } else if (items.computer == 'home') {
       downloadFromS3();
     } else {
-      console.log('unknown computer settings ' + items.computer);
+      console.log('⁉️ unknown computer settings ' + items.computer);
     }
   });
 }
 
-function replaceInHomeTree(bookmarks, target_root, target_folder) {
-  var bookmarkTreeNodes = chrome.bookmarks.getTree(
-    function(bookmarkTreeNodes) {
-      console.log(bookmarkTreeNodes);
+function dfs(root, target) {
+  if (root.title == target) {
+    return root
+  }
 
+  if (root.children && root.children.length) {
+    // folder
+    for (let node of root.children) {
+      result = dfs(node, target);
+      if (result && (result.title == target)) {
+        return result
+      }
     }
-  );
+  }
 
 }
+
+function createBookmarkNodes(parentId, bookmarks) {
+  bookmarks.forEach(function(bm) {
+    chrome.bookmarks.create({
+      parentId: parentId,
+      title: bm.title,
+      url: bm.url,
+      index: bm.index
+    }, function(result) {
+      if (bm.children && bm.children.length > 0) {
+        createBookmarkNodes(result.id, bm.children);
+      }
+    });
+  });
+}
+
+function replaceInHomeTree(bookmarks, targetRoot, targetFolder) {
+
+  chrome.bookmarks.getTree(
+    function(bookmarkTreeNodes) {
+      var targetNode = dfs(bookmarkTreeNodes[0], targetFolder);
+      console.log('😎 replacing bookmarks in targetFolder (' + targetFolder + ')');
+      // remove old target node
+      chrome.bookmarks.removeTree(targetNode.id, function() {
+        // recreate old target node
+        chrome.bookmarks.create({
+          parentId: targetNode.parentId,
+          title: targetNode.title,
+          url: targetNode.url,
+          index: targetNode.index,
+        }, function(newTarget) {
+          createBookmarkNodes(newTarget.id, bookmarks[0]['children']);
+        }); // chrome.bookmarks.create
+      }); // chrome.bookmarks.removeTree
+    } // chrome.bookmarks.getTree callback
+  ); // chrome.bookmarks.getTree
+
+} // replaceInHomeTree
 
 // // Observe bookmark modifications and revert any modifications made to managed
 // // bookmarks. The tree is always reloaded in case the events happened while the
