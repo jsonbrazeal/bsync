@@ -46,7 +46,7 @@ function uploadToS3(data) {
         console.log('⚠️ error: ' + err.toString());
         alert('bsync uploadToS3 error: ' + err.toString());
       } else {
-        console.log('sync done 😎');
+        console.log('😎 sync done');
       }
     });
   });
