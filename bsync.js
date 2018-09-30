@@ -43,10 +43,10 @@ function uploadToS3(data) {
     var params = {Key: items.syncFile, ContentType: 'plain/text', Body: blobData}
     s3.putObject(params, function (err, data) {
       if (err) {
-        console.log('⚠️ error: ' + err.toString());
+        chrome.extension.getBackgroundPage().console.log('⚠️ error: ' + err.toString());
         alert('bsync uploadToS3 error: ' + err.toString());
       } else {
-        console.log('😎 sync done');
+        chrome.extension.getBackgroundPage().console.log('😎 sync done');
       }
     });
   });
@@ -77,10 +77,10 @@ function downloadFromS3() {
     };
     s3.getObject(params, function(err, data) {
       if (err) {
-        console.log('⚠️ error: ' + err.toString());
+        chrome.extension.getBackgroundPage().console.log('⚠️ error: ' + err.toString());
         alert('bsync downloadFromS3 error: ' + err.toString());
       } else {
-        console.log('🤓 downloaded bookmarks');
+        chrome.extension.getBackgroundPage().console.log('🤓 downloaded bookmarks');
         // bookmarks = JSON.parse(decodeURIComponent(escape(window.atob(data.Body.toString()))))
         bookmarks = JSON.parse(data.Body.toString())
         replaceInHomeTree(bookmarks, items.targetFolder);
@@ -90,7 +90,7 @@ function downloadFromS3() {
 }
 
 chrome.runtime.onInstalled.addListener(function(details) {
-  console.log('☀️ bsync loaded: ' + JSON.stringify(details));
+  chrome.extension.getBackgroundPage().console.log('☀️ bsync loaded: ' + JSON.stringify(details));
   chrome.alarms.create('bsync', {
     delayInMinutes: 1,
     periodInMinutes: 5
@@ -100,7 +100,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === 'bsync') {
-    console.log('🌎 bsync starting ' + new Date().toUTCString());
+    chrome.extension.getBackgroundPage().console.log('🌎 bsync starting ' + new Date().toUTCString());
     chrome.storage.local.get({
       s3Bucket: '',
       s3Region: '',
@@ -112,7 +112,7 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
       if (items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && items.targetFolder) {
         performSync();
       } else {
-        console.log('⚠️ bsync is not configured correctly and will not sync. Please open options and configure extension.');
+        chrome.extension.getBackgroundPage().console.log('⚠️ bsync is not configured correctly and will not sync. Please open options and configure extension.');
       }
     } // chrome.storage.local.get callback
     ); // chrome.storage.local.get
@@ -133,7 +133,7 @@ function performSync() {
     } else if (items.computer == 'home') {
       downloadFromS3();
     } else {
-      console.log('⁉️ unknown computer settings ' + items.computer);
+      chrome.extension.getBackgroundPage().console.log('⁉️ unknown computer settings ' + items.computer);
     }
   });
 }
@@ -175,7 +175,7 @@ function replaceInHomeTree(bookmarks, targetFolder) {
   chrome.bookmarks.getTree(
     function(bookmarkTreeNodes) {
       var targetNode = dfs(bookmarkTreeNodes[0], targetFolder);
-      console.log('😎 replacing bookmarks in targetFolder (' + targetFolder + ')');
+      chrome.extension.getBackgroundPage().console.log('😎 replacing bookmarks in targetFolder (' + targetFolder + ')');
       // remove old target node
       chrome.bookmarks.removeTree(targetNode.id, function() {
         // recreate old target node
@@ -198,21 +198,21 @@ function replaceInHomeTree(bookmarks, targetFolder) {
 // // page was inactive.
 
 // chrome.bookmarks.onCreated.addListener(function(id, info) {
-//   console.log('bookmark created:');
-//   console.log(info);
-//   console.log('uploading to s3');
+//   chrome.extension.getBackgroundPage().console.log('bookmark created:');
+//   chrome.extension.getBackgroundPage().console.log(info);
+//   chrome.extension.getBackgroundPage().console.log('uploading to s3');
 //   // uploadToS3('{ "bookmark": "created" }');
 //   // downloadFromS3();
 // });
 
 // chrome.bookmarks.onChildrenReordered.addListener(function(id, info) {
-//   console.log('bookmark children reordered');
-//   console.log(info);
+//   chrome.extension.getBackgroundPage().console.log('bookmark children reordered');
+//   chrome.extension.getBackgroundPage().console.log(info);
 // });
 
 // chrome.bookmarks.onImportEnded.addListener(function(id, info) {
-//   console.log('bookmark import ended');
-//   console.log(info);
+//   chrome.extension.getBackgroundPage().console.log('bookmark import ended');
+//   chrome.extension.getBackgroundPage().console.log(info);
 // });
 
 // chrome.bookmarks.onMoved.addListener(function(id, info) {
@@ -229,8 +229,8 @@ function replaceInHomeTree(bookmarks, targetFolder) {
 //   //       parentNode.reorderChildren();
 //   //   }
 //   // });
-//   console.log('bookmark moved');
-//   console.log(info);
+//   chrome.extension.getBackgroundPage().console.log('bookmark moved');
+//   chrome.extension.getBackgroundPage().console.log(info);
 // });
 
 // chrome.bookmarks.onChanged.addListener(function(id, info) {
@@ -243,8 +243,8 @@ function replaceInHomeTree(bookmarks, targetFolder) {
 //   //     'url': managedNode._url
 //   //   });
 //   // });
-//   console.log('bookmark changed');
-//   console.log(info);
+//   chrome.extension.getBackgroundPage().console.log('bookmark changed');
+//   chrome.extension.getBackgroundPage().console.log(info);
 // });
 
 // chrome.bookmarks.onRemoved.addListener(function(id, info) {
@@ -258,6 +258,6 @@ function replaceInHomeTree(bookmarks, targetFolder) {
 //   //   callbackChain.push(tree.store.bind(tree));
 //   //   managedNode.regenerate(info.parentId, info.index, callbackChain);
 //   // });
-//   console.log('bookmark removed');
-//   console.log(info);
+//   chrome.extension.getBackgroundPage().console.log('bookmark removed');
+//   chrome.extension.getBackgroundPage().console.log(info);
 // });
