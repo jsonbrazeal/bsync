@@ -9,6 +9,7 @@ function saveSettings() {
   var s3Bucket = document.getElementById('s3Bucket').value;
   var s3Region = document.getElementById('s3Region').value;
   var lastModified = new Date().toUTCString();
+  var settings = [computer, targetFolder, s3KeyId, s3KeySecret, s3Bucket, s3Region, lastModified];
 
   chrome.storage.local.set({
     computer: computer,
@@ -22,18 +23,24 @@ function saveSettings() {
     lastModified: lastModified
   }, function() {
     document.getElementById('status').textContent = 'settings saved ' + lastModified;
-    chrome.extension.getBackgroundPage().console.log(computer + ' computer settings saved ' + lastModified);
-    chrome.extension.getBackgroundPage().console.log('\u{23F1} alarm created...sync will occur every 5 minutes starting in 1 minute');
-    chrome.alarms.create('bsync', {
-      delayInMinutes: 1,
-      periodInMinutes: 5
-    });
-    document.addEventListener('keydown', function(event) {
-      const key = event.key; // Or const {key} = event; in ES6+
-      if (key === "Escape") {
-        window.close();
-      }
-    });
+    chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer settings saved ' + lastModified);
+
+    if (settings.includes('')) {
+      // chrome.extension.getBackgroundPage().console.log('nope!')
+      chrome.extension.getBackgroundPage().alert('Sync not enabled because bsync is not fully configured. Please finish configuration in extension options.');
+    } else {
+      chrome.extension.getBackgroundPage().console.log('\u{23F1} creating alarm...sync will occur every 5 minutes starting in 1 minute');
+      chrome.alarms.create('bsync', {
+        delayInMinutes: 1,
+        periodInMinutes: 5
+      });
+      document.addEventListener('keydown', function(event) {
+        const key = event.key; // Or const {key} = event; in ES6+
+        if (key === 'Escape') {
+          window.close();
+        }
+      });
+    } // if settings.includes(null)
   }); // chrome.storage.local.set
 } // saveSettings
 

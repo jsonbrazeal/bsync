@@ -97,7 +97,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === 'bsync') {
-    console.log('💻 bsync starting ' + new Date().toUTCString())
+    console.log('🌎 bsync starting ' + new Date().toUTCString())
     performSync();
   }
 });
