@@ -2,7 +2,6 @@
 function saveSettings() {
 
   var computer = document.getElementById('computer').value;
-  var targetRoot = document.getElementById('targetRoot').value;
   var targetFolder = document.getElementById('targetFolder').value;
   var s3KeyId = document.getElementById('s3KeyId').value;
   var s3KeySecret = document.getElementById('s3KeySecret').value;
@@ -13,13 +12,12 @@ function saveSettings() {
 
   chrome.storage.local.set({
     computer: computer,
-    targetRoot: targetRoot,
     targetFolder: targetFolder.replace(/^\/|\/$/g, ''), // remove forward and trailing slashes
     s3KeyId: s3KeyId,
     s3KeySecret: s3KeySecret,
     s3Bucket: s3Bucket,
     s3Region: s3Region,
-    syncFile: 'jason.bsync',
+    syncFile: 'config.bsync',
     lastModified: lastModified
   }, function() {
     document.getElementById('status').textContent = 'settings saved ' + lastModified;
@@ -48,7 +46,6 @@ function saveSettings() {
 function restoreSettings() {
   chrome.storage.local.get({
     computer: '',
-    targetRoot: '',
     targetFolder: '',
     s3KeyId: '',
     s3KeySecret: '',
@@ -57,7 +54,6 @@ function restoreSettings() {
     lastModified: ''
   }, function(items) {
     document.getElementById('computer').value = items.computer;
-    document.getElementById('targetRoot').value = items.targetRoot;
     document.getElementById('targetFolder').value = items.targetFolder;
     document.getElementById('s3KeyId').value = items.s3KeyId;
     document.getElementById('s3KeySecret').value = items.s3KeySecret;
