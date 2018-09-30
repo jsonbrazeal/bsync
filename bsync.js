@@ -91,6 +91,10 @@ function downloadFromS3() {
 
 chrome.runtime.onInstalled.addListener(function(details) {
   console.log('☀️ bsync loaded: ' + JSON.stringify(details));
+  chrome.alarms.create('bsync', {
+    delayInMinutes: 1,
+    periodInMinutes: 5
+  });
   chrome.runtime.openOptionsPage();
 });
 
