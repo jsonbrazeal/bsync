@@ -59,10 +59,9 @@ function downloadFromS3() {
     s3KeyId: '',
     s3KeySecret: '',
     syncFile: '',
-    targetRoot: '',
     targetFolder: ''
   }, function(items) {
-    if (!(items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && items.targetRoot && items.targetFolder)) {
+    if (!(items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && items.targetFolder)) {
       alert('bsync is not correctly configured for downloadFromS3 operation');
       chrome.runtime.openOptionsPage();
     }
@@ -84,7 +83,7 @@ function downloadFromS3() {
         console.log('🤓 downloaded bookmarks');
         // bookmarks = JSON.parse(decodeURIComponent(escape(window.atob(data.Body.toString()))))
         bookmarks = JSON.parse(data.Body.toString())
-        replaceInHomeTree(bookmarks, items.targetRoot, items.targetFolder);
+        replaceInHomeTree(bookmarks, items.targetFolder);
       }
     });
   });
@@ -97,10 +96,24 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === 'bsync') {
-    console.log('🌎 bsync starting ' + new Date().toUTCString())
-    performSync();
-  }
-});
+    console.log('🌎 bsync starting ' + new Date().toUTCString());
+    chrome.storage.local.get({
+      s3Bucket: '',
+      s3Region: '',
+      s3KeyId: '',
+      s3KeySecret: '',
+      syncFile: '',
+      targetFolder: ''
+    }, function(items) {
+      if (items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && items.targetFolder) {
+        performSync();
+      } else {
+        console.log('⚠️ bsync is not configured correctly and will not sync. Please open options and configure extension.');
+      }
+    } // chrome.storage.local.get callback
+    ); // chrome.storage.local.get
+  } // if (alarm.name === 'bsync')
+}); // chrome.alarms.onAlarm.addListener
 
 function performSync() {
   chrome.storage.local.get({
@@ -153,7 +166,7 @@ function createBookmarkNodes(parentId, bookmarks) {
   });
 }
 
-function replaceInHomeTree(bookmarks, targetRoot, targetFolder) {
+function replaceInHomeTree(bookmarks, targetFolder) {
 
   chrome.bookmarks.getTree(
     function(bookmarkTreeNodes) {
