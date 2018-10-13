@@ -23,7 +23,7 @@ function saveOptions() {
   var s3Bucket = document.getElementById('s3Bucket').value;
   var s3Region = document.getElementById('s3Region').value;
   var lastModified = new Date().toString();
-  var options = [computer, targetFolder, s3KeyId, s3KeySecret, s3Bucket, s3Region, lastModified];
+  var options = {computer: computer, targetFolder: targetFolder, s3KeyId: s3KeyId, s3KeySecret: s3KeySecret, s3Bucket: s3Bucket, s3Region: s3Region, lastModified: lastModified};
 
   chrome.storage.local.set({
     computer: computer,
@@ -43,7 +43,17 @@ function saveOptions() {
     }, 100);
     chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer options saved ' + lastModified);
 
-    if (options.includes('')) {
+    var configErrors = false;
+    for (var key in options) {
+      if ((options[key] === '') && (key !== 'targetFolder')) {
+        configErrors = true;
+      }
+    }
+    if ((options['computer'] == 'home') && (!(options['targetFolder']))) {
+      configErrors = true;
+    }
+
+    if (configErrors) {
       // chrome.extension.getBackgroundPage().console.log('nope!')
       chrome.extension.getBackgroundPage().alert('Sync not enabled because bsync is not fully configured. Please finish configuration in extension options.');
     } else {
