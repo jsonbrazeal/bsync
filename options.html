@@ -27,8 +27,8 @@
         <option value="home">home</option>
         <option value="remote">remote</option>
     </select>
-    <label class="text-right targetFolder" for="targetFolder">Target Folder</label>
-    <input class="targetFolder form-control" type="text" id="targetFolder" placeholder="folder name">
+    <label class="text-right targetFolder d-none" for="targetFolder">Target Folder</label>
+    <input class="targetFolder form-control d-none" type="text" id="targetFolder" placeholder="folder name">
     </span>
   </div>
 
@@ -63,7 +63,7 @@
     </g>
   </g>
 </svg>
-<p>If "home" is selected, all bookmarks will be downloaded from AWS S3 to this computer. In that case, you will need to choose a target folder where the remote bookmarks will be saved to. Note: everything in this folder is cleared out and replaced with remote bookmarks when a sync operation occurs. Please ensure that the home computer only has one folder with the target name you provide.</p>
+<p>If "home" is selected, all bookmarks will be downloaded from AWS S3 to this computer. In that case, you will need to choose a target folder where the remote bookmarks will be saved to. Note: everything in this folder is deleted and replaced with remote bookmarks when a sync operation occurs. Please ensure that the home computer only has one folder with the target name you provide.</p>
   </div>
 
         <h3>AWS S3 configuration:</h3>

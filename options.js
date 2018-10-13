@@ -5,12 +5,10 @@ function showHideTargetFolder() {
     targetFolderElems.forEach(function(elem) {
       elem.classList.remove('d-none');
     });
-  } else if (computer.value === 'remote') {
+  } else {
     targetFolderElems.forEach(function(elem) {
       elem.classList.add('d-none');
     });
-  } else {
-    alert('Unknown value for computer: ' + computer);
   }
 }
 
@@ -88,6 +86,7 @@ function restoreOptions() {
       document.getElementById('status').classList.add('fadeIn');
       document.getElementById('status').textContent = 'options saved ' + items.lastModified;
     }
+    showHideTargetFolder();
   }); // chrome.storage.local.get
 } // restoreOptions
 
