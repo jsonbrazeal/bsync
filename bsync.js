@@ -107,9 +107,14 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
       s3KeyId: '',
       s3KeySecret: '',
       syncFile: '',
-      targetFolder: ''
+      targetFolder: '',
+      computer: ''
     }, function(items) {
-      if (items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && items.targetFolder) {
+      var targetFolderOK = true;
+      if ((items.computer === 'home') && (!(items.targetFolder))) {
+        targetFolderOK = false;
+      }
+      if (items.s3Bucket && items.syncFile && items.s3Region && items.s3KeySecret && items.s3KeyId && targetFolderOK) {
         performSync();
       } else {
         chrome.extension.getBackgroundPage().console.log('⚠️ bsync is not configured correctly and will not sync. Please open options and configure extension.');
