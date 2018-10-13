@@ -1,35 +1,147 @@
 <!DOCTYPE html>
 <html>
-<head><title>bsync</title></head>
-<body>
+<head>
+  <title>bsync</title>
+    <link href="bootstrap.css" rel="stylesheet">
+    <link href="bsync.css" rel="stylesheet">
 
-<div>
-  <label>Computer:</label>
-  <select id="computer">
-    <option value="home">home</option>
-    <option value="remote">remote</option>
-  </select>
-  <p>If "remote" is selected, all bookmarks from this computer will be synced to AWS S3.</p>
-  <p>If "home" is selected, all bookmarks will be synced from AWS S3 to this computer. In that case, you will be prompted to choose a target folder where the remote bookmarks will be saved to. Note: everything in this folder is cleared out and replaced with remote bookmarks when a sync operation occurs.</p>
+</head>
+<body id="bsyncOptions" class="text-center">
+
+  <div>
+    <header>
+      <img width="100" height="100" alt="bsync logo" src="data:image/png;base64,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">
+      <h1>bsync options</h1>
+    </header>
+
+    <main>
+
+
+
+<form>
+
+
+  <div class="form-group form-inline">
+    <label class="text-right" for="computer">Computer</label>
+    <select class="form-control" id="computer">
+        <option value="home">home</option>
+        <option value="remote">remote</option>
+    </select>
+    <label class="text-right targetFolder" for="targetFolder">Target Folder</label>
+    <input class="targetFolder form-control" type="text" id="targetFolder" placeholder="folder name">
+    </span>
+  </div>
+
+<div class="infoContainer">
+  <svg width="50px" height="30px" viewBox="0 0 1921 1409" version="1.1" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+      <g id="Cloud_upload_font_awesome" fill="#FFFFFF">
+        <g id="svg3001">
+          <g id="g3003" transform="translate(960.779661, 704.237300) scale(1, -1) translate(-960.779661, -704.237300) translate(0.779661, 0.237300)">
+            <path d="M1280,672 C1280,681.333333 1277,689 1271,695 L919,1047 C913,1053 905.333333,1056 896,1056 C886.666667,1056 879,1053 873,1047 L522,696 C515.333333,688 512,680 512,672 C512,662.666667 515,655 521,649 C527,643 534.666667,640 544,640 L768,640 L768,288 C768,279.333333 771.166667,271.833333 777.5,265.5 C783.833333,259.166667 791.333333,256 800,256 L992,256 C1000.66667,256 1008.16667,259.166667 1014.5,265.5 C1020.83333,271.833333 1024,279.333333 1024,288 L1024,640 L1248,640 C1256.66667,640 1264.16667,643.166667 1270.5,649.5 C1276.83333,655.833333 1280,663.333333 1280,672 L1280,672 Z M1920,384 C1920,278 1882.5,187.5 1807.5,112.5 C1732.5,37.5 1642,0 1536,0 L448,0 C324.666667,0 219.166667,43.8333333 131.5,131.5 C43.8333333,219.166667 0,324.666667 0,448 C0,534.666667 23.3333333,614.666667 70,688 C116.666667,761.333333 179.333333,816.333333 258,853 C256.666667,873 256,887.333333 256,896 C256,1037.33333 306,1158 406,1258 C506,1358 626.666667,1408 768,1408 C872,1408 967.166667,1379 1053.5,1321 C1139.83333,1263 1202.66667,1186 1242,1090 C1289.33333,1131.33333 1344.66667,1152 1408,1152 C1478.66667,1152 1539,1127 1589,1077 C1639,1027 1664,966.666667 1664,896 C1664,845.333333 1650.33333,799.333333 1623,758 C1709.66667,737.333333 1780.83333,692.166667 1836.5,622.5 C1892.16667,552.833333 1920,473.333333 1920,384 L1920,384 Z"
+              id="path3005"></path>
+          </g>
+        </g>
+      </g>
+    </g>
+  </svg>
+  <p>If "remote" is selected, all bookmarks from this computer will be uploaded to AWS S3.</p>
+  </div>
+
+  <div class="infoContainer">
+  <svg width="50px" height="30px" viewBox="0 0 1921 1409" version="1.1" xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Cloud_download_font_awesome" fill="#FFFFFF">
+      <g id="svg2">
+        <g id="g4" transform="translate(960.186441, 704.016900) scale(1, -1) translate(-960.186441, -704.016900) translate(0.186441, 0.016900)">
+          <path d="M1280,608 C1280,617.333333 1277,625 1271,631 C1265,637 1257.33333,640 1248,640 L1024,640 L1024,992 C1024,1000.66667 1020.83333,1008.16667 1014.5,1014.5 C1008.16667,1020.83333 1000.66667,1024 992,1024 L800,1024 C791.333333,1024 783.833333,1020.83333 777.5,1014.5 C771.166667,1008.16667 768,1000.66667 768,992 L768,640 L544,640 C535.333333,640 527.833333,636.833333 521.5,630.5 C515.166667,624.166667 512,616.666667 512,608 C512,598.666667 515,591 521,585 L873,233 C879,227 886.666667,224 896,224 C905.333333,224 913,227 919,233 L1270,584 C1276.66667,592 1280,600 1280,608 L1280,608 Z M1920,384 C1920,278 1882.5,187.5 1807.5,112.5 C1732.5,37.5 1642,0 1536,0 L448,0 C324.666667,0 219.166667,43.8333333 131.5,131.5 C43.8333333,219.166667 0,324.666667 0,448 C0,534.666667 23.3333333,614.666667 70,688 C116.666667,761.333333 179.333333,816.333333 258,853 C256.666667,873 256,887.333333 256,896 C256,1037.33333 306,1158 406,1258 C506,1358 626.666667,1408 768,1408 C872,1408 967.166667,1379 1053.5,1321 C1139.83333,1263 1202.66667,1186 1242,1090 C1289.33333,1131.33333 1344.66667,1152 1408,1152 C1478.66667,1152 1539,1127 1589,1077 C1639,1027 1664,966.666667 1664,896 C1664,845.333333 1650.33333,799.333333 1623,758 C1709.66667,737.333333 1780.83333,692.166667 1836.5,622.5 C1892.16667,552.833333 1920,473.333333 1920,384 L1920,384 Z"
+            id="path6"></path>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
+<p>If "home" is selected, all bookmarks will be downloaded from AWS S3 to this computer. In that case, you will need to choose a target folder where the remote bookmarks will be saved to. Note: everything in this folder is cleared out and replaced with remote bookmarks when a sync operation occurs. Please ensure that the home computer only has one folder with the target name you provide.</p>
+  </div>
+
+        <h3>AWS S3 configuration:</h3>
+
+        <div id="awsInput">
+
+      <div class="form-group form-inline">
+        <label class="text-right" for="computer">Access Key ID</label>
+        <input type="text" class="form-control" id="s3KeyId" placeholder="access key id">
+      </div>
+            <div class="form-group form-inline">
+        <label class="text-right" for="computer">Access Key Secret</label>
+              <input type="text" class="form-control" id="s3KeySecret" placeholder="access key secret">
+
+            </div>
+                  <div class="form-group form-inline">
+        <label class="text-right" for="computer">Bucket Name</label>
+                    <input type="text" class="form-control" id="s3Bucket" placeholder="bucket name">
+        </div>
+              <div class="form-group form-inline">
+        <label class="text-right" for="computer">Region</label>
+                <input type="text" class="form-control" id="s3Region" placeholder="region">
+        </div>
+      </div>
+<div id="awsInfo">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="15" viewbox="0 0 141 110">
+  <path fill-rule="evenodd" fill="#ffc107" d="M70.499,0.012 L0.000,109.995 L141.000,109.995 L70.499,0.012 ZM70.499,101.278 C65.489,101.278 61.429,97.231 61.429,92.240 C61.429,87.248 65.489,83.201 70.499,83.201 C75.508,83.201 79.571,87.248 79.571,92.240 C79.571,97.231 75.508,101.278 70.499,101.278 ZM61.429,74.822 L61.429,30.343 L79.569,30.343 L79.569,74.822 L61.429,74.822 Z" />
+</svg>
+        <p>
+          AWS credentials are stored unencrypted in Chrome's local storage and are never uploaded to the cloud. The access key entered here should have read/write access to the bucket.
+        </p>
 </div>
 
-<div>
-  <label>Target Folder:</label>
-  <input type="text" id="targetFolder" placeholder="folder name">
-</div>
 
-<div>
-  <label>AWS S3:</label>
-  <input type="text" id="s3KeyId" placeholder="access key id">
-  <input type="text" id="s3KeySecret" placeholder="access key secret">
-  <input type="text" id="s3Bucket" placeholder="bucket name">
-  <input type="text" id="s3Region" placeholder="region">
-</div>
 
-<button id="save">Save</button>
+      <button type="button" class="btn btn-light" id="save">Save</button>
+</form>
 
-<div id="status"></div>
+      <div id="status">&nbsp;</div>
 
-<script src="options.js"></script>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2018 <a href="http://jasonbrazeal.com/">Jason Brazeal</a></p>
+    </footer>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script src="options.js"></script>
 </body>
 </html>

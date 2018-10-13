@@ -1,5 +1,22 @@
-// Saves settings to chrome.storage
-function saveSettings() {
+function showHideTargetFolder() {
+  var computer = document.getElementById('computer');
+  var targetFolderElems = document.querySelectorAll('.targetFolder');
+  if (computer.value === 'home') {
+    targetFolderElems.forEach(function(elem) {
+      elem.classList.remove('d-none');
+    });
+  } else if (computer.value === 'remote') {
+    targetFolderElems.forEach(function(elem) {
+      elem.classList.add('d-none');
+    });
+  } else {
+    alert('Unknown value for computer: ' + computer);
+  }
+}
+
+
+// Saves options to chrome.storage
+function saveOptions() {
 
   var computer = document.getElementById('computer').value;
   var targetFolder = document.getElementById('targetFolder').value;
@@ -7,8 +24,8 @@ function saveSettings() {
   var s3KeySecret = document.getElementById('s3KeySecret').value;
   var s3Bucket = document.getElementById('s3Bucket').value;
   var s3Region = document.getElementById('s3Region').value;
-  var lastModified = new Date().toUTCString();
-  var settings = [computer, targetFolder, s3KeyId, s3KeySecret, s3Bucket, s3Region, lastModified];
+  var lastModified = new Date().toString();
+  var options = [computer, targetFolder, s3KeyId, s3KeySecret, s3Bucket, s3Region, lastModified];
 
   chrome.storage.local.set({
     computer: computer,
@@ -20,10 +37,15 @@ function saveSettings() {
     syncFile: 'config.bsync',
     lastModified: lastModified
   }, function() {
-    document.getElementById('status').textContent = 'settings saved ' + lastModified;
-    chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer settings saved ' + lastModified);
+    document.getElementById('status').innerHTML = '&nbsp;';
+    document.getElementById('status').classList.remove('fadeIn');
+    setTimeout(function() {
+      document.getElementById('status').textContent = 'options saved ' + lastModified;
+      document.getElementById('status').classList.add('fadeIn');
+    }, 100);
+    chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer options saved ' + lastModified);
 
-    if (settings.includes('')) {
+    if (options.includes('')) {
       // chrome.extension.getBackgroundPage().console.log('nope!')
       chrome.extension.getBackgroundPage().alert('Sync not enabled because bsync is not fully configured. Please finish configuration in extension options.');
     } else {
@@ -38,12 +60,13 @@ function saveSettings() {
           window.close();
         }
       });
-    } // if settings.includes(null)
+    } // if options.includes(null)
   }); // chrome.storage.local.set
-} // saveSettings
+} // saveOptions
 
 // Restores select box and checkbox state using the preferences stored in chrome.storage
-function restoreSettings() {
+function restoreOptions() {
+  document.addEventListener('change', showHideTargetFolder);
   chrome.storage.local.get({
     computer: '',
     targetFolder: '',
@@ -60,11 +83,14 @@ function restoreSettings() {
     document.getElementById('s3Bucket').value = items.s3Bucket;
     document.getElementById('s3Region').value = items.s3Region;
     if (items.lastModified) {
-      document.getElementById('status').textContent = 'settings saved ' + items.lastModified;
+      document.getElementById('status').textContent = '';
+      document.getElementById('status').classList.remove('fadeIn');
+      document.getElementById('status').classList.add('fadeIn');
+      document.getElementById('status').textContent = 'options saved ' + items.lastModified;
     }
   }); // chrome.storage.local.get
-} // restoreSettings
+} // restoreOptions
 
 // Sets event listeners
-document.addEventListener('DOMContentLoaded', restoreSettings);
-document.getElementById('save').addEventListener('click', saveSettings);
+document.addEventListener('DOMContentLoaded', restoreOptions);
+document.getElementById('save').addEventListener('click', saveOptions);
