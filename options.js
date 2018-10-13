@@ -46,7 +46,12 @@ function saveOptions() {
       document.getElementById('status').textContent = 'options saved ' + lastModified;
       document.getElementById('status').classList.add('fadeIn');
     }, 100);
-    chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer options saved ' + lastModified);
+
+    if (computer) {
+      chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer options saved ' + lastModified);
+    } else {
+      chrome.extension.getBackgroundPage().console.log('\u{1F4BB} incomplete options saved ' + lastModified);
+    }
 
     var configErrors = false;
     for (var key in options) {
