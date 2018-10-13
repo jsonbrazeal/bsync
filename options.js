@@ -25,6 +25,11 @@ function saveOptions() {
   var lastModified = new Date().toString();
   var options = {computer: computer, targetFolder: targetFolder, s3KeyId: s3KeyId, s3KeySecret: s3KeySecret, s3Bucket: s3Bucket, s3Region: s3Region, lastModified: lastModified};
 
+  if (options['computer'] == 'remote') {
+    targetFolder = '';
+    document.getElementById('targetFolder').value = '';
+  }
+
   chrome.storage.local.set({
     computer: computer,
     targetFolder: targetFolder.replace(/^\/|\/$/g, ''), // remove forward and trailing slashes
@@ -52,7 +57,6 @@ function saveOptions() {
     if ((options['computer'] == 'home') && (!(options['targetFolder']))) {
       configErrors = true;
     }
-
     if (configErrors) {
       // chrome.extension.getBackgroundPage().console.log('nope!')
       chrome.extension.getBackgroundPage().alert('Sync not enabled because bsync is not fully configured. Please finish configuration in extension options.');
