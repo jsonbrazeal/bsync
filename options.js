@@ -47,12 +47,6 @@ function saveOptions() {
       document.getElementById('status').classList.add('fadeIn');
     }, 100);
 
-    if (computer) {
-      chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer options saved ' + lastModified);
-    } else {
-      chrome.extension.getBackgroundPage().console.log('\u{1F4BB} incomplete options saved ' + lastModified);
-    }
-
     var configErrors = false;
     for (var key in options) {
       if ((options[key] === '') && (key !== 'targetFolder')) {
@@ -65,7 +59,9 @@ function saveOptions() {
     if (configErrors) {
       // chrome.extension.getBackgroundPage().console.log('nope!')
       chrome.extension.getBackgroundPage().alert('Sync not enabled because bsync is not fully configured. Please finish configuration in extension options.');
+      chrome.extension.getBackgroundPage().console.log('\u{1F4BB} incomplete options saved ' + lastModified);
     } else {
+      chrome.extension.getBackgroundPage().console.log('\u{1F4BB} ' + computer + ' computer options saved ' + lastModified);
       chrome.extension.getBackgroundPage().console.log('\u{23F1} creating alarm...sync will occur every 5 minutes starting in 1 minute');
       chrome.alarms.create('bsync', {
         delayInMinutes: 1,
