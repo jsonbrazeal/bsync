@@ -1,7 +1,7 @@
 {
   "name": "bsync",
   "description": "Bookmarks Sync",
-  "version": "1.0",
+  "version": "0.0.2",
   "manifest_version": 2,
   "minimum_chrome_version": "69",
   "background": {
